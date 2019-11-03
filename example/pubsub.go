@@ -20,6 +20,7 @@ func main() {
 		DB:       0,  // use default DB
 	})
 
+	// Subscribe to messages
 	sm := src.NewSubscriptionManager(redisClient)
 	sm.Subscribe("ch:1", "a.*", func(msg *redis.Message) {
 		log.Info(
@@ -32,21 +33,15 @@ func main() {
 		)
 	})
 
-	go func() {
-		for i := 1; i <= 10; i++ {
-			// Publish a message.
-			time.Sleep(time.Second)
-			msg := fmt.Sprintf("hello %v", i)
-			log.Info("publish message: ", msg)
-			err := redisClient.Publish("a.1", msg).Err()
-			if err != nil {
-				panic(err)
-			}
-		}
-	}()
-
-	for {
+	// Publish a messages
+	for i := 1; i <= 10; i++ {
 		time.Sleep(time.Second)
+		msg := fmt.Sprintf("hello %v", i)
+		log.Info("publish message: ", msg)
+		err := redisClient.Publish("a.1", msg).Err()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 }
