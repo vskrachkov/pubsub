@@ -14,8 +14,6 @@ func init() {
 }
 
 func main() {
-	log.Info("test log")
-
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set
