@@ -5,6 +5,7 @@ import (
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
 	"github.com/vskrachkov/pubsub/src"
+	"math/rand"
 	"time"
 )
 
@@ -20,18 +21,11 @@ func main() {
 		DB:       0,  // use default DB
 	})
 
-	// Subscribe to messages
 	sm := src.NewSubscriptionManager(redisClient)
-	sm.Subscribe("ch:1", "a.*", func(msg *redis.Message) {
-		log.Info(
-			fmt.Sprintf(
-				"['%v' '%v']: %v",
-				msg.Channel,
-				msg.Pattern,
-				msg.Payload,
-			),
-		)
-	})
+
+	pattern1 := "a.*"
+	sm.Subscribe(&pattern1, newConsumer(&pattern1))
+	sm.Subscribe(&pattern1, newConsumer(&pattern1))
 
 	// Publish a messages
 	for i := 1; i <= 10; i++ {
@@ -44,4 +38,20 @@ func main() {
 		}
 	}
 
+}
+
+func newConsumer(name *string) func(message *redis.Message) {
+	id := rand.Intn(100)
+	return func(msg *redis.Message) {
+		log.Info(
+			fmt.Sprintf(
+				"{%d}{%s} received message: ['%s' '%s']: %s",
+				id,
+				*name,
+				msg.Channel,
+				msg.Pattern,
+				msg.Payload,
+			),
+		)
+	}
 }
