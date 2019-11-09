@@ -5,7 +5,6 @@ import (
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
 	"github.com/vskrachkov/pubsub/src"
-	"math/rand"
 	"time"
 )
 
@@ -23,9 +22,17 @@ func main() {
 
 	sm := src.NewSubscriptionManager(redisClient)
 
-	pattern1 := "a.*"
-	sm.Subscribe(&pattern1, newConsumer(&pattern1))
-	sm.Subscribe(&pattern1, newConsumer(&pattern1))
+	pattern := "a.*"
+	pattern2 := "*"
+
+	channel1 := "ch:1"
+	sm.Subscribe(&pattern, newConsumer(&channel1))
+
+	channel2 := "ch:2"
+	sm.Subscribe(&pattern, newConsumer(&channel2))
+
+	channel3 := "ch:3"
+	sm.Subscribe(&pattern2, newConsumer(&channel3))
 
 	// Publish a messages
 	for i := 1; i <= 10; i++ {
@@ -41,12 +48,11 @@ func main() {
 }
 
 func newConsumer(name *string) func(message *redis.Message) {
-	id := rand.Intn(100)
 	return func(msg *redis.Message) {
 		log.Info(
 			fmt.Sprintf(
-				"{%d}{%s} received message: ['%s' '%s']: %s",
-				id,
+				"[%d] '%s' received message: ['%s' '%s']: %s",
+				name,
 				*name,
 				msg.Channel,
 				msg.Pattern,

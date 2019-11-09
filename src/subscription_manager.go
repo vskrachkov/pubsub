@@ -26,12 +26,11 @@ func (sm *SubscriptionManager) Subscribe(
 	consumer Consumer,
 ) {
 	log.Info("subscribing to the pattern: ", *pattern)
-
-	if sm.consumers[*pattern] != nil {
-		*sm.consumers[*pattern] = append(*sm.consumers[*pattern], consumer)
+	if sm.consumers[*pattern] == nil {
+		sm.consumers[*pattern] = &[]Consumer{consumer}
 		sm.subscribe(pattern)
 	} else {
-		sm.consumers[*pattern] = &[]Consumer{consumer}
+		*sm.consumers[*pattern] = append(*sm.consumers[*pattern], consumer)
 	}
 }
 
