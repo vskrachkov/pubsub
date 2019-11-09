@@ -30,7 +30,7 @@ func (sm *SubscriptionManager) Subscribe(
 ) {
 	log.Info("subscribing to the pattern: ", pattern)
 	sm.updateConsumers(pattern, consumer)
-	sm.updatestrings(pattern, clientChannel)
+	sm.updateClientChannels(pattern, clientChannel)
 	ch := sm.subscribe(pattern) // Go channel which receives messages
 	go func() {
 		for msg := range ch {
@@ -53,7 +53,7 @@ func (sm SubscriptionManager) updateConsumers(
 	}
 }
 
-func (sm SubscriptionManager) updatestrings(
+func (sm SubscriptionManager) updateClientChannels(
 	pattern string,
 	clientChannel string,
 ) {
