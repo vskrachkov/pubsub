@@ -1,4 +1,4 @@
-package src
+package pubsub
 
 import (
 	"github.com/go-redis/redis"
@@ -8,16 +8,16 @@ import (
 type Consumer = func(message *redis.Message)
 
 type SubscriptionManager struct {
-	redisClient *redis.Client
-	pubSubs     map[string]bool
-	consumers   map[string]*[]Consumer
+	redisClient   *redis.Client
+	subscriptions map[string]bool
+	consumers     map[string]*[]Consumer
 }
 
 func NewSubscriptionManager(redisClient *redis.Client) *SubscriptionManager {
 	return &SubscriptionManager{
-		redisClient: redisClient,
-		pubSubs:     map[string]bool{},
-		consumers:   map[string]*[]Consumer{},
+		redisClient:   redisClient,
+		subscriptions: map[string]bool{},
+		consumers:     map[string]*[]Consumer{},
 	}
 }
 
@@ -35,14 +35,14 @@ func (sm *SubscriptionManager) Subscribe(
 }
 
 func (sm SubscriptionManager) subscribe(pattern *string) {
-	if !sm.pubSubs[*pattern] {
-		pubSub := sm.redisClient.PSubscribe(*pattern)
-		_, err := pubSub.Receive() // Wait for confirmation that subscription is created
+	if !sm.subscriptions[*pattern] {
+		subscription := sm.redisClient.PSubscribe(*pattern)
+		_, err := subscription.Receive() // Wait for confirmation that subscription is created
 		if err != nil {
 			panic(err)
 		}
-		sm.pubSubs[*pattern] = true
-		ch := pubSub.Channel()
+		sm.subscriptions[*pattern] = true
+		ch := subscription.Channel()
 		go func() {
 			for msg := range ch {
 				sm.consume(msg)

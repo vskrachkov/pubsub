@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
-	"github.com/vskrachkov/pubsub/src"
+	"github.com/vskrachkov/pubsub"
 	"time"
 )
 
@@ -20,7 +20,7 @@ func main() {
 		DB:       0,  // use default DB
 	})
 
-	sm := src.NewSubscriptionManager(redisClient)
+	sm := pubsub.NewSubscriptionManager(redisClient)
 
 	pattern := "a.*"
 	pattern2 := "*"
